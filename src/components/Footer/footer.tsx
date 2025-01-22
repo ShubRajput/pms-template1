@@ -46,8 +46,8 @@ const Footer = () => {
         <div className="text-center pt-8 border-t border-gray-200">
           <p className="text-gray-600">
             Copyright © 2024 Restaurant Name. All Rights Reserved. Designed By{' '}
-            <a href="https://petpooja.com" className="text-emerald-600 hover:underline">
-              Petpooja
+            <a href="" className="text-emerald-600 hover:underline">
+              PurpleMind
             </a>
           </p>
         </div>

@@ -3,8 +3,31 @@ import AnimatedImage from './components/AnimatedImage/animatedImage';
 import FoodSection from './components/FoodSection/foodSection';
 import FeedbackSection from './components/Feedback/feedBackSection';
 import Footer from './components/Footer/footer';
+import { useEffect } from 'react';
+import { fetchStartersMenuData, fetchMainCourseMenuData, fetchDessertsMenuData } from './store/fetchMenuData';
+import { menuContext } from './context/menuContext';
+
 
 function App() {
+  const {  starterMenu, setStarterMenu, mainCourceMenu, setMainCourceMenu, dessertMenu, setDessertMenu  } = menuContext();
+  useEffect(() => {
+    const fetchData = async () => {
+      const starters = await fetchStartersMenuData();
+      const mainCourse = await fetchMainCourseMenuData();
+      const desserts = await fetchDessertsMenuData();
+      setStarterMenu(starters);
+      setMainCourceMenu(mainCourse);
+      setDessertMenu(desserts);
+    };
+    
+    fetchData();
+  }, []);
+  useEffect(() => {
+      // console.log("Menu item is ", starterMenu);
+      // console.log("mainCourceMenu item is ", mainCourceMenu);
+      // console.log("dessertMenu item is ", dessertMenu);
+      
+  },[])
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
