@@ -5,4 +5,7 @@ export const ENDPOINTS = {
     DESSERT: "/api/admin/menu/dessert",
     ALL_MENU: "/api/admin/menu",
   },
+  SESSION: {
+     GETSESSION: "/api/customer/getsession"
+  }
 } as const;
