@@ -7,5 +7,10 @@ export const ENDPOINTS = {
   },
   SESSION: {
      GETSESSION: "/api/customer/getsession"
+  },
+  CART: {
+    ADDTOCART: "/api/customer/cart/add",
+    REMOVEFROMCART: "/api/customer/cart/remove",
+    FETCHFROMCART: "/api/customer/getCartItems"
   }
 } as const;

@@ -16,4 +16,27 @@ export const API = {
         { tableNumber: data.tableNumber } // Ensure data is properly structured
       ),
   },
+  cart: {
+    addToCart: (data: {
+      sessionToken: string;
+      dishId: string;
+      quantity: string;
+    }) =>
+      instance.post(ENDPOINTS.CART.ADDTOCART, {
+        sessionToken: data.sessionToken,
+        dishId: data.dishId,
+        quantity: data.quantity,
+      }),
+    removeFromCart: (data: { sessionToken: string; dishId: string }) =>
+      instance.post(ENDPOINTS.CART.REMOVEFROMCART, {
+        sessionToken: data.sessionToken,
+        dishId: data.dishId,
+      }),
+    fetchFromCart: (data: {
+      sessionToken: string;
+    }) =>
+      instance.post(ENDPOINTS.CART.FETCHFROMCART, {
+        sessionToken: data.sessionToken,
+      }),
+  },
 } as const;

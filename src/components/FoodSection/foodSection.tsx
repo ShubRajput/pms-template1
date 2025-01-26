@@ -1,11 +1,12 @@
 import FoodCard from "../FoodCard/foodCard";
 import MenuModal from "../menuModel/menuModel";
 import { useState, useEffect } from "react";
-import { menuContext } from "../../context/menuContext";
+import { useAppContext } from "../../context/appContext";
 import { fetchAllMenu } from "../../store/fetchMenuData";
 
+
 const FoodSection = () => {
-  const { allMenu, setAllMenu } = menuContext();
+  const { allMenu, setAllMenu } = useAppContext();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Fetch data from the API

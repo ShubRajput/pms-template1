@@ -6,15 +6,22 @@ import FoodSection from "./components/FoodSection/foodSection";
 import FeedbackSection from "./components/Feedback/feedBackSection";
 import Footer from "./components/Footer/footer";
 import { API } from "./lib/axios/method";
+import { useAppContext } from "./context/appContext";
 
 function App() {
   const [searchParams] = useSearchParams(); // Hook to read query parameters
+  const { setSessionToken, setCartItems, cartItems } = useAppContext();
 
   const createSession = async (tableNumber: string) => {
     try {
       console.log("Sending table number:", tableNumber);
       const response = await API.session.getSession({ tableNumber });
       console.log("Session Created:", response);
+      if (response.sessionToken) {
+        setSessionToken(response.sessionToken);
+        setCartItems(response.cart || []); // Set the cart items
+        console.log("Cart Item is: -->", cartItems);
+      }
     } catch (error) {
       console.error("Error creating session:", error);
     }
@@ -29,7 +36,7 @@ function App() {
     } else {
       console.error("Table number is missing or invalid");
     }
-  }, [searchParams]); // Depend on searchParams to re-run if URL changes
+  }, [searchParams, ]); // Depend on searchParams to re-run if URL changes
 
   return (
     <div className="min-h-screen bg-gray-50">
