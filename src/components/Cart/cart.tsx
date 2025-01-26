@@ -1,6 +1,7 @@
 import { ShoppingBag, X } from "lucide-react";
 import { useEffect } from "react";
 import { useAppContext } from "../../context/appContext";
+import { useCart } from "../../hooks/useCart";
 
 interface CartProps {
   isOpen: boolean;
@@ -8,24 +9,77 @@ interface CartProps {
 }
 
 const Cart = ({ isOpen, onClose }: CartProps) => {
-  const { cartItems, setCartItems } = useAppContext();
+  const { cartItems, setCartItems, sessionToken } = useAppContext();
+  const { addToCart, removeFromCart } = useCart();
 
   // Increment item quantity
-  const incrementItem = (id: string) => {
-    const updatedCart = cartItems.map((item) =>
-      item._id === id ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    setCartItems(updatedCart);
+  const incrementItem = async (id: string) => {
+    const item = cartItems.find((item) => item.dishId === id);
+    if (!item) return;
+
+    try {
+      const response = await addToCart({
+        sessionToken: sessionToken || "",
+        dishId: id,
+        quantity: 1,
+      });
+
+      if (response?.cart) {
+        const updatedCart = cartItems.map((item) =>
+          item.dishId === id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+        setCartItems(updatedCart);
+      } else {
+        console.error("Failed to increment item quantity:", response?.message);
+      }
+    } catch (error) {
+      console.error("Error incrementing item quantity:", error);
+    }
   };
 
   // Decrement item quantity
-  const decrementItem = (id: string) => {
-    const updatedCart = cartItems.map((item) =>
-      item._id === id && item.quantity > 1
-        ? { ...item, quantity: item.quantity - 1 }
-        : item
-    );
-    setCartItems(updatedCart);
+  const decrementItem = async (id: string) => {
+    // alert("hi")
+    const item = cartItems.find((item) => item.dishId === id);
+    if (!item || item.quantity <= 1) return;
+
+    try {
+      const response = await removeFromCart({
+        sessionToken: sessionToken || "",
+        itemId: id,
+      });
+
+      if (response?.cart) {
+        const updatedCart = cartItems.map((item) =>
+          item.dishId === id ? { ...item, quantity: item.quantity - 1 } : item
+        );
+        
+        setCartItems(updatedCart);
+      } else {
+        console.error("Failed to decrement item quantity:", response?.message);
+      }
+    } catch (error) {
+      console.error("Error decrementing item quantity:", error);
+    }
+  };
+
+  // Remove an item from the cart
+  const handleRemoveFromCart = async (id: string) => {
+    try {
+      const response = await removeFromCart({
+        sessionToken: sessionToken || "",
+        itemId: id,
+      });
+
+      if (response) {
+        const updatedCart = cartItems.filter((item) => item._id !== id);
+        setCartItems(updatedCart);
+      } else {
+        console.error("Failed to remove item from cart:", response?.message);
+      }
+    } catch (error) {
+      console.error("Error removing item from cart:", error);
+    }
   };
 
   // Calculate the total price of items in the cart
@@ -33,12 +87,6 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-
-  // Remove an item from the cart
-  const removeFromCart = (id: string) => {
-    const updatedCart = cartItems.filter((item) => item._id !== id);
-    setCartItems(updatedCart);
-  };
 
   useEffect(() => {
     if (isOpen) {
@@ -82,20 +130,20 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => decrementItem(item._id)}
+                      onClick={() => decrementItem(item.dishId)}
                       className="bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
                     >
                       -
                     </button>
                     <span>{item.quantity}</span>
                     <button
-                      onClick={() => incrementItem(item._id)}
+                      onClick={() => incrementItem(item.dishId)}
                       className="bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
                     >
                       +
                     </button>
                     <button
-                      onClick={() => removeFromCart(item._id)}
+                      onClick={() => handleRemoveFromCart(item._id)}
                       className="text-red-500 hover:text-red-600 p-1"
                     >
                       <X className="w-4 h-4" />

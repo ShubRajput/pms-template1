@@ -12,19 +12,43 @@ interface MenuModalProps {
 
 const MenuModal = ({ isOpen, onClose, items, title }: MenuModalProps) => {
   const { addToCart } = useCart();
-  const { sessionToken } = useAppContext();
+  const { sessionToken, setCartItems, cartItems } = useAppContext();
 
   const handleAddToCart = async (item: MenuItem) => {
-    console.log("item is :--->", item._id);
-
     try {
-      await addToCart({
-        sessionToken: sessionToken ? sessionToken : "", // Replace with actual session token
+      // Call the API to add the item to the cart
+      const response = await addToCart({
+        sessionToken: sessionToken || "",
         dishId: item._id,
         quantity: 1,
       });
+
+      // If the API call succeeds, update the cart state
+      if (response?.cart) {
+        const updatedCart = [...cartItems];
+        const existingItem = updatedCart.find((cartItem) => cartItem.dishId === item._id);
+
+        if (existingItem) {
+          // If item already exists in the cart, increment its quantity
+          existingItem.quantity += 1;
+        } else {
+          // Otherwise, add the new item to the cart
+          updatedCart.push({
+            dishId: item._id,
+            name: item.name,
+            price: item.price,
+            quantity: 1,
+            _id: response.cartItemId, // Assuming the API response includes a new cart item ID
+          });
+        }
+
+        setCartItems(updatedCart);
+      } else {
+        throw new Error("Failed to add item to the cart. API did not return success.");
+      }
     } catch (error) {
       console.error("Failed to add item to cart:", error);
+      alert("Failed to add item to the cart. Please try again.");
     }
   };
 
@@ -67,7 +91,7 @@ const MenuModal = ({ isOpen, onClose, items, title }: MenuModalProps) => {
                     onClick={() => handleAddToCart(item)}
                     className="px-4 py-2 bg-emerald-600 text-white rounded-full text-sm hover:bg-emerald-700 transition-colors whitespace-nowrap"
                   >
-                    Add to Cart
+                    Add to Cartt
                   </button>
                 </div>
               </div>
