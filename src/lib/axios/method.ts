@@ -2,6 +2,14 @@ import instance from "./instance";
 import { ENDPOINTS } from "./endpoints";
 import { MenuItem } from "../../types/menu";
 
+export interface Item {
+  name: string;
+  quantity: number;
+  price: number;
+  dishId: string;
+  itemId: string;
+}
+
 export const API = {
   menu: {
     getStarters: () => instance.get<MenuItem[]>(ENDPOINTS.MENU.STARTER),
@@ -32,11 +40,23 @@ export const API = {
         sessionToken: data.sessionToken,
         dishId: data.dishId,
       }),
-    fetchFromCart: (data: {
-      sessionToken: string;
-    }) =>
+    fetchFromCart: (data: { sessionToken: string }) =>
       instance.post(ENDPOINTS.CART.FETCHFROMCART, {
         sessionToken: data.sessionToken,
       }),
+  },
+  orders: {
+    placeorder: (data: {
+      sessionToken: string;
+      items: Item[];
+      total: number;
+    }) => {
+      instance.post(ENDPOINTS.ORDERS.PLACEORDER, {
+        sessionToken: data.sessionToken,
+        items: data.items,
+        total: data.total,
+        
+      });
+    },
   },
 } as const;

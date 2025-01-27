@@ -2,6 +2,7 @@ import { ShoppingBag, X } from "lucide-react";
 import { useEffect } from "react";
 import { useAppContext } from "../../context/appContext";
 import { useCart } from "../../hooks/useCart";
+import { API, Item } from "../../lib/axios/method";
 
 interface CartProps {
   isOpen: boolean;
@@ -11,6 +12,29 @@ interface CartProps {
 const Cart = ({ isOpen, onClose }: CartProps) => {
   const { cartItems, setCartItems, sessionToken } = useAppContext();
   const { addToCart, removeFromCart } = useCart();
+
+  const handleCheckout = async (
+    items: Item[],
+    sessionToken: string,
+    total: number
+  ) => {
+    const data: { items: Item[]; sessionToken: string; total: number } = {
+      items,
+      sessionToken,
+      total,
+    };
+    try {
+      await API.orders.placeorder({
+        items,
+        sessionToken,
+        total,
+      });
+    } catch (error) {}
+    console.log("data is in the cart to checkout", data);
+    const emptyArray: any = []
+    setCartItems(emptyArray)
+    alert("Order Placed Successfully!")
+  };
 
   // Increment item quantity
   const incrementItem = async (id: string) => {
@@ -53,7 +77,7 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
         const updatedCart = cartItems.map((item) =>
           item.dishId === id ? { ...item, quantity: item.quantity - 1 } : item
         );
-        
+
         setCartItems(updatedCart);
       } else {
         console.error("Failed to decrement item quantity:", response?.message);
@@ -161,7 +185,16 @@ const Cart = ({ isOpen, onClose }: CartProps) => {
               <span className="font-semibold">Total:</span>
               <span className="font-semibold">₹{total}</span>
             </div>
-            <button className="w-full bg-emerald-600 text-white py-3 rounded-full hover:bg-emerald-700 transition-colors">
+            <button
+              onClick={() =>
+                handleCheckout(
+                  cartItems,
+                  sessionToken ? sessionToken : "",
+                  total
+                )
+              }
+              className="w-full bg-emerald-600 text-white py-3 rounded-full hover:bg-emerald-700 transition-colors"
+            >
               Checkout
             </button>
           </div>

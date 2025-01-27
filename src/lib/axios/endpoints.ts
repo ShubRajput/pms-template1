@@ -12,5 +12,8 @@ export const ENDPOINTS = {
     ADDTOCART: "/api/customer/cart/add",
     REMOVEFROMCART: "/api/customer/cart/remove",
     FETCHFROMCART: "/api/customer/getCartItems"
+  },
+  ORDERS: {
+    PLACEORDER: "/api/customer/order/placeorder"
   }
 } as const;
