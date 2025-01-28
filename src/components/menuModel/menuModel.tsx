@@ -43,7 +43,9 @@ const MenuModal = ({ isOpen, onClose, items, title }: MenuModalProps) => {
         }
 
         setCartItems(updatedCart);
+        alert("Item added");
       } else {
+        alert("Failed to add item to the cart. Please try again.");
         throw new Error("Failed to add item to the cart. API did not return success.");
       }
     } catch (error) {
