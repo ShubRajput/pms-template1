@@ -1,15 +1,48 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import OrderStatus from './orderStatus';
-import { Order } from '../../types/orders';
+import React, { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import OrderStatus from "./orderStatus";
+import { ref, onValue } from "firebase/database"; // Firebase imports
+import { db } from "../../ config/firebaseConfig"; // Adjust import based on your file structure
+
+interface Order {
+  orderId: string;
+  createdAt: number;
+  items: string[];
+  status: string;
+  total: number;
+}
 
 interface OrderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  orders: Order[];
 }
 
-const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, orders }) => {
+const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose }) => {
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  // Real-time listener for orders
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const ordersRef = ref(db, "orders");
+    const unsubscribe = onValue(ordersRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        console.log("data of the snapshot", data);
+        
+        const ordersArray = Object.entries(data).map(([key, order]: any) => ({
+          orderId: key,
+          ...order,
+        }));
+        setOrders(ordersArray);
+      } else {
+        setOrders([]); // No orders available
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup listener when modal closes
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -29,19 +62,25 @@ const OrderModal: React.FC<OrderModalProps> = ({ isOpen, onClose, orders }) => {
           <div className="space-y-4">
             {orders.map((order) => (
               <div
-                key={order.id}
+                key={order.orderId}
                 className="bg-gray-50 p-4 rounded-lg space-y-3"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-semibold">Order #{order.id}</h3>
-                    <p className="text-sm text-gray-600">{order.items.join(', ')}</p>
+                    <h3 className="font-semibold">Order #{order.orderId}</h3>
+                    <p className="text-sm text-gray-600">
+                      Items: {order.items.join(", ")}
+                    </p>
                   </div>
-                  <OrderStatus status={order.status} />
+                  <OrderStatus status={"not_ready"} />
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Total: ₹{order.total}</span>
-                  <span className="text-gray-600">{order.time}</span>
+                  <span className="text-gray-600">
+                    Total: ₹{order.total}
+                  </span>
+                  <span className="text-gray-600">
+                    {new Date(order.createdAt).toLocaleString()}
+                  </span>
                 </div>
               </div>
             ))}
